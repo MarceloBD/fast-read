@@ -1,0 +1,132 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-background);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.closeButton:hover {
+  background-color: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 48px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  line-height: 1.8;
+  cursor: pointer;
+}
+
+.word {
+  display: inline;
+  padding: 2px 1px;
+  border-radius: 3px;
+  transition: background-color 0.1s ease;
+}
+
+.word:hover {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+.currentWord {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+.codeBlock {
+  display: block;
+  margin: 20px 0;
+  padding: 16px 20px;
+  background-color: var(--color-surface);
+  border-radius: 8px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.codeBlock code {
+  font-family: inherit;
+}
+
+.imageFigure {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.imageBlock {
+  display: block;
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 0 auto;
+}
+
+.imageCaption {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.heading {
+  display: block;
+  margin: 32px 0 12px;
+  font-weight: 700;
+  font-size: 1.4em;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+}
+
+.paragraph {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--color-text);
+}

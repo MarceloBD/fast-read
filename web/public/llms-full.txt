@@ -1,0 +1,107 @@
+# Fast Read — Complete Documentation
+
+> Fast Read is a free, open-source speed reading application using RSVP (Rapid Serial Visual Presentation) that helps users read documents faster by displaying one word at a time with an optimal recognition point (ORP). Available as both a web app and a Tauri desktop app.
+
+## What is RSVP Speed Reading?
+
+RSVP (Rapid Serial Visual Presentation) is a speed reading technique where words are shown one at a time in a fixed position. This eliminates the need for eye movement across lines, allowing the brain to process words faster. Research shows RSVP can increase reading speed from 250 WPM (average) to 500-1000+ WPM with practice.
+
+## What is ORP (Optimal Recognition Point)?
+
+The Optimal Recognition Point is the character position in a word where your eye naturally focuses for fastest recognition. Fast Read highlights this character in red, reducing cognitive load and improving word recognition speed.
+
+## Features
+
+### Speed Reading Engine
+- Display one word at a time using RSVP technique
+- Adjustable speed from 50 to 1500 words per minute (WPM)
+- Drift-corrected timing for accurate WPM delivery
+- ORP highlighting for faster word recognition
+- Context preview showing surrounding words
+
+### Document Support
+- Plain text (.txt) — direct reading
+- Markdown (.md) — parsed with heading/code block detection
+- PDF (.pdf) — text extraction via pdf.js
+- EPUB (.epub) — full ebook support via epub.js
+- HTML (.html) — DOM parsing with structure preservation
+
+### Reading Modes
+- **Study Mode**: Pauses RSVP when encountering code blocks or images, displaying them in a side panel for review. Press Space or click to continue.
+- **Speed Mode**: Skips code blocks and images entirely for uninterrupted reading flow.
+
+### Customization
+- 4 themes: Dark, Light, Sepia, High Contrast
+- Adjustable word font size (16-64px)
+- Adjustable context text size (10-32px)
+- Independent WPM speed control
+
+### Text-to-Speech
+- Native browser TTS integration
+- Sync voice speed to WPM or control independently
+- Rate adjustment from 0.5x to 4.0x
+
+### Keyboard Controls
+- Space: Play/Pause
+- Left/Right arrows: Navigate words (hold to repeat)
+- Up/Down arrows: Adjust speed (hold to repeat)
+- M: Toggle reading mode
+- T: Toggle text-to-speech
+- R: Restart document
+
+### Full Text View
+- See the entire document formatted in original layout
+- Click any word to jump to that position in the reader
+- Code blocks and images rendered inline
+
+## Technical Architecture
+
+### Web Version (Next.js 15)
+- React 19 with TypeScript
+- CSS Modules for styling
+- Clean Architecture with DDD principles
+- Deployable to Vercel
+
+### Desktop Version (Tauri 2)
+- Rust backend with React frontend
+- 3-8MB app bundle
+- ~70MB RAM usage
+- Cross-platform (Windows, macOS, Linux)
+
+## Getting Started
+
+### Web Version
+1. Visit https://fast-read.vercel.app
+2. Paste text or drag and drop a file
+3. Click Play to start speed reading
+4. Adjust speed with Up/Down arrows or slider
+
+### Desktop Version
+1. Clone the repository
+2. Install dependencies: npm install
+3. Install Rust toolchain
+4. Run: npm run tauri dev
+
+## FAQ
+
+### How fast can I read with RSVP?
+Most users start at 300 WPM and can increase to 500-800 WPM with practice. Advanced users may reach 1000+ WPM.
+
+### Does speed reading reduce comprehension?
+At moderate speeds (300-500 WPM), comprehension remains high. Above 600 WPM, comprehension may decrease for complex material. Use Study mode for technical content.
+
+### What file formats are supported?
+Fast Read supports TXT, MD (Markdown), PDF, EPUB, and HTML files.
+
+### Is my data private?
+Yes. All document processing happens in your browser. No files are uploaded to any server.
+
+### Can I use keyboard only?
+Yes. Full keyboard controls are available for hands-free operation.
+
+## Statistics
+- Supports 5 document formats
+- Speed range: 50-1500 WPM
+- 4 color themes available
+- Average startup time: under 1 second
+- Bundle size: ~350KB (web), ~5MB (desktop)

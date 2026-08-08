@@ -1,0 +1,26 @@
+# Fast Read
+
+> Fast Read is a free, open-source speed reading web application that uses RSVP (Rapid Serial Visual Presentation) to help users read documents faster by displaying one word at a time with an optimal recognition point.
+
+## Features
+
+- [Speed Reading with RSVP](https://fast-read.vercel.app/): Read documents at 300-1500 words per minute
+- [Multiple Format Support](https://fast-read.vercel.app/): Supports PDF, EPUB, Markdown, HTML, and plain text files
+- [Study and Speed Modes](https://fast-read.vercel.app/): Study mode pauses on code/images, Speed mode skips them
+- [Customizable Themes](https://fast-read.vercel.app/): Dark, Light, Sepia, and High Contrast themes
+- [Text-to-Speech](https://fast-read.vercel.app/): Native browser TTS with adjustable speed
+- [Keyboard Controls](https://fast-read.vercel.app/): Full keyboard navigation for hands-free reading
+
+## How It Works
+
+1. Paste text or upload a document (PDF, EPUB, MD, HTML, TXT)
+2. Words are displayed one at a time using RSVP technique
+3. The Optimal Recognition Point (ORP) highlights the key letter in each word
+4. Adjust speed from 50 to 1500 WPM using keyboard or slider
+5. Use Study mode to pause on code blocks, or Speed mode for uninterrupted reading
+
+## Technical Details
+
+- Built with Next.js 15 and React 19
+- Also available as a Tauri 2 desktop app
+- Open source on GitHub

@@ -1,0 +1,53 @@
+/* Minimal highlight.js theme that respects CSS custom properties */
+.hljs {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: var(--color-accent);
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type {
+  color: #98c379;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.hljs-number,
+.hljs-regexp,
+.hljs-addition,
+.hljs-symbol {
+  color: #d19a66;
+}
+
+.hljs-variable,
+.hljs-meta,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #61afef;
+}
+
+.hljs-function {
+  color: #61afef;
+}
+
+.hljs-params {
+  color: var(--color-text);
+}
