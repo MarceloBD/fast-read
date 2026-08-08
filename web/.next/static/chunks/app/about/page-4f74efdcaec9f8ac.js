@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[220],{1432:(_,e,t)=>{Promise.resolve().then(t.t.bind(t,2754,23))},2754:_=>{_.exports={container:"about_container__Ucmgi",subtitle:"about_subtitle__M_O2E",table:"about_table__j7f7A",footer:"about_footer__EMIj8"}}},_=>{_.O(0,[569,441,255,358],()=>_(_.s=1432)),_N_E=_.O()}]);
