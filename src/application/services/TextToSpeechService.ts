@@ -11,6 +11,7 @@ export class TextToSpeechService {
   private utterance: SpeechSynthesisUtterance | null = null;
   private callbacks: TTSCallbacks | null = null;
   private isActive = false;
+  private isPausedState = false;
   private rate = 1.0;
   private words: string[] = [];
   private currentWordIndex = 0;
@@ -27,9 +28,9 @@ export class TextToSpeechService {
   setRate(rate: number): void {
     this.rate = Math.max(0.5, Math.min(4.0, rate));
 
-    if (this.isActive && this.utterance) {
+    if (this.isActive && !this.isPausedState) {
       const resumeIndex = this.currentWordIndex;
-      this.stopInternal();
+      this.cancelSpeech();
       this.speakFromIndex(resumeIndex);
     }
   }
@@ -51,11 +52,12 @@ export class TextToSpeechService {
 
   speak(fromIndex = 0): void {
     if (this.words.length === 0) return;
+    this.isPausedState = false;
     this.speakFromIndex(fromIndex);
   }
 
   private speakFromIndex(fromIndex: number): void {
-    this.stopInternal();
+    this.cancelSpeech();
 
     this.startFromIndex = fromIndex;
     this.currentWordIndex = fromIndex;
@@ -73,8 +75,10 @@ export class TextToSpeechService {
     };
 
     this.utterance.onend = () => {
-      this.isActive = false;
-      this.callbacks?.onComplete();
+      if (!this.isPausedState) {
+        this.isActive = false;
+        this.callbacks?.onComplete();
+      }
     };
 
     this.utterance.onboundary = (event) => {
@@ -96,36 +100,37 @@ export class TextToSpeechService {
   }
 
   pause(): void {
-    if (this.isActive) {
-      this.synthesis.pause();
-      this.callbacks?.onPause();
-    }
+    if (!this.isActive || this.isPausedState) return;
+    this.isPausedState = true;
+    this.cancelSpeech();
+    this.callbacks?.onPause();
   }
 
   resume(): void {
-    if (this.synthesis.paused) {
-      this.synthesis.resume();
-      this.callbacks?.onResume();
-    }
+    if (!this.isPausedState) return;
+    this.isPausedState = false;
+    this.callbacks?.onResume();
+    this.speakFromIndex(this.currentWordIndex);
   }
 
   stop(): void {
-    this.stopInternal();
+    this.cancelSpeech();
+    this.isActive = false;
+    this.isPausedState = false;
     this.currentWordIndex = 0;
   }
 
-  private stopInternal(): void {
+  private cancelSpeech(): void {
     this.synthesis.cancel();
-    this.isActive = false;
     this.utterance = null;
   }
 
   get isSpeaking(): boolean {
-    return this.isActive && this.synthesis.speaking;
+    return this.isActive && !this.isPausedState;
   }
 
   get isPaused(): boolean {
-    return this.synthesis.paused;
+    return this.isPausedState;
   }
 
   get isSupported(): boolean {
@@ -134,12 +139,6 @@ export class TextToSpeechService {
 
   getVoices(): SpeechSynthesisVoice[] {
     return this.synthesis.getVoices();
-  }
-
-  setVoice(voice: SpeechSynthesisVoice): void {
-    if (this.utterance) {
-      this.utterance.voice = voice;
-    }
   }
 
   destroy(): void {

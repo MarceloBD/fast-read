@@ -7,7 +7,7 @@ import styles from "./PlaybackControls.module.css";
 export function PlaybackControls() {
   const { state, togglePlayPause, seekTo, updateSettings, loadDocument } =
     useReader();
-  const { isTTSActive, isTTSPaused, isTTSSupported, toggleTTS, stopTTS } =
+  const { isTTSActive, isTTSPaused, isTTSSupported, toggleTTSEnabled, toggleTTSPause, stopTTS } =
     useTTS();
   const { document: doc, currentIndex, isPlaying, settings } = state;
 
@@ -51,7 +51,7 @@ export function PlaybackControls() {
         <div className={styles.leftControls}>
           <button
             className={styles.playButton}
-            onClick={isTTSActive ? toggleTTS : togglePlayPause}
+            onClick={isTTSActive ? toggleTTSPause : togglePlayPause}
             disabled={!doc}
             title="Play/Pause (Space)"
           >
@@ -61,21 +61,11 @@ export function PlaybackControls() {
           {isTTSSupported && (
             <button
               className={`${styles.iconButton} ${isTTSActive ? styles.ttsActive : ""}`}
-              onClick={toggleTTS}
+              onClick={toggleTTSEnabled}
               disabled={!doc}
-              title={isTTSActive ? "Pause/Resume voice" : "Read aloud (T)"}
+              title={isTTSActive ? "Disable voice (T)" : "Enable voice (T)"}
             >
-              <VolumeIcon size={16} />
-            </button>
-          )}
-
-          {isTTSActive && (
-            <button
-              className={styles.iconButton}
-              onClick={stopTTS}
-              title="Stop voice"
-            >
-              <StopIcon size={16} />
+              {isTTSActive ? <VolumeIcon size={16} /> : <VolumeMuteIcon size={16} />}
             </button>
           )}
 

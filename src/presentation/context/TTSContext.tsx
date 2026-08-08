@@ -18,7 +18,8 @@ interface TTSContextValue {
   pauseTTS: () => void;
   resumeTTS: () => void;
   stopTTS: () => void;
-  toggleTTS: () => void;
+  toggleTTSEnabled: () => void;
+  toggleTTSPause: () => void;
 }
 
 const TTSContext = createContext<TTSContextValue | null>(null);
@@ -94,19 +95,23 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     setIsTTSPaused(false);
   }, []);
 
-  const toggleTTS = useCallback(() => {
-    if (isTTSActive && !isTTSPaused) {
-      pauseTTS();
+  const toggleTTSEnabled = useCallback(() => {
+    if (isTTSActive) {
+      stopTTS();
       return;
     }
+    startTTS();
+  }, [isTTSActive, startTTS, stopTTS]);
+
+  const toggleTTSPause = useCallback(() => {
+    if (!isTTSActive) return;
 
     if (isTTSPaused) {
       resumeTTS();
-      return;
+    } else {
+      pauseTTS();
     }
-
-    startTTS();
-  }, [isTTSActive, isTTSPaused, startTTS, pauseTTS, resumeTTS]);
+  }, [isTTSActive, isTTSPaused, pauseTTS, resumeTTS]);
 
   const contextValue: TTSContextValue = {
     isTTSActive,
@@ -116,7 +121,8 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     pauseTTS,
     resumeTTS,
     stopTTS,
-    toggleTTS,
+    toggleTTSEnabled,
+    toggleTTSPause,
   };
 
   return (

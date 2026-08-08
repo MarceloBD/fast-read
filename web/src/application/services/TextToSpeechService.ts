@@ -7,20 +7,18 @@ export interface TTSCallbacks {
 }
 
 export class TextToSpeechService {
-  private synthesis: SpeechSynthesis | null = null;
+  private synthesis: SpeechSynthesis;
   private utterance: SpeechSynthesisUtterance | null = null;
   private callbacks: TTSCallbacks | null = null;
   private isActive = false;
+  private isPausedState = false;
   private rate = 1.0;
   private words: string[] = [];
   private currentWordIndex = 0;
   private startFromIndex = 0;
 
-  private getSynthesis(): SpeechSynthesis | null {
-    if (!this.synthesis && typeof window !== "undefined" && "speechSynthesis" in window) {
-      this.synthesis = window.speechSynthesis;
-    }
-    return this.synthesis;
+  constructor() {
+    this.synthesis = window.speechSynthesis;
   }
 
   setCallbacks(callbacks: TTSCallbacks): void {
@@ -30,9 +28,9 @@ export class TextToSpeechService {
   setRate(rate: number): void {
     this.rate = Math.max(0.5, Math.min(4.0, rate));
 
-    if (this.isActive && this.utterance) {
+    if (this.isActive && !this.isPausedState) {
       const resumeIndex = this.currentWordIndex;
-      this.stopInternal();
+      this.cancelSpeech();
       this.speakFromIndex(resumeIndex);
     }
   }
@@ -54,11 +52,12 @@ export class TextToSpeechService {
 
   speak(fromIndex = 0): void {
     if (this.words.length === 0) return;
+    this.isPausedState = false;
     this.speakFromIndex(fromIndex);
   }
 
   private speakFromIndex(fromIndex: number): void {
-    this.stopInternal();
+    this.cancelSpeech();
 
     this.startFromIndex = fromIndex;
     this.currentWordIndex = fromIndex;
@@ -76,8 +75,10 @@ export class TextToSpeechService {
     };
 
     this.utterance.onend = () => {
-      this.isActive = false;
-      this.callbacks?.onComplete();
+      if (!this.isPausedState) {
+        this.isActive = false;
+        this.callbacks?.onComplete();
+      }
     };
 
     this.utterance.onboundary = (event) => {
@@ -95,63 +96,49 @@ export class TextToSpeechService {
       }
     };
 
-    const synthesis = this.getSynthesis();
-    if (synthesis && this.utterance) {
-      synthesis.speak(this.utterance);
-    }
+    this.synthesis.speak(this.utterance);
   }
 
   pause(): void {
-    const synthesis = this.getSynthesis();
-    if (this.isActive && synthesis) {
-      synthesis.pause();
-      this.callbacks?.onPause();
-    }
+    if (!this.isActive || this.isPausedState) return;
+    this.isPausedState = true;
+    this.cancelSpeech();
+    this.callbacks?.onPause();
   }
 
   resume(): void {
-    const synthesis = this.getSynthesis();
-    if (synthesis?.paused) {
-      synthesis.resume();
-      this.callbacks?.onResume();
-    }
+    if (!this.isPausedState) return;
+    this.isPausedState = false;
+    this.callbacks?.onResume();
+    this.speakFromIndex(this.currentWordIndex);
   }
 
   stop(): void {
-    this.stopInternal();
+    this.cancelSpeech();
+    this.isActive = false;
+    this.isPausedState = false;
     this.currentWordIndex = 0;
   }
 
-  private stopInternal(): void {
-    const synthesis = this.getSynthesis();
-    synthesis?.cancel();
-    this.isActive = false;
+  private cancelSpeech(): void {
+    this.synthesis.cancel();
     this.utterance = null;
   }
 
   get isSpeaking(): boolean {
-    const synthesis = this.getSynthesis();
-    return this.isActive && (synthesis?.speaking ?? false);
+    return this.isActive && !this.isPausedState;
   }
 
   get isPaused(): boolean {
-    const synthesis = this.getSynthesis();
-    return synthesis?.paused ?? false;
+    return this.isPausedState;
   }
 
   get isSupported(): boolean {
-    return typeof window !== "undefined" && "speechSynthesis" in window;
+    return "speechSynthesis" in window;
   }
 
   getVoices(): SpeechSynthesisVoice[] {
-    const synthesis = this.getSynthesis();
-    return synthesis?.getVoices() ?? [];
-  }
-
-  setVoice(voice: SpeechSynthesisVoice): void {
-    if (this.utterance) {
-      this.utterance.voice = voice;
-    }
+    return this.synthesis.getVoices();
   }
 
   destroy(): void {
