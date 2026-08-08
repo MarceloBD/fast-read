@@ -3,7 +3,7 @@
 import { useReader } from "../../context/ReaderContext";
 import { useTTS } from "../../context/TTSContext";
 import { ReadingSettings } from "../../../domain/value-objects/ReadingSettings";
-import { PlayIcon, PauseIcon, VolumeIcon, VolumeMuteIcon, StopIcon, RestartIcon, DocumentIcon } from "../Icons/Icons";
+import { PlayIcon, PauseIcon, VolumeIcon, VolumeMuteIcon, RestartIcon, DocumentIcon } from "../Icons/Icons";
 import styles from "./PlaybackControls.module.css";
 
 export function PlaybackControls() {
