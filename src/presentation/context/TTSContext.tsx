@@ -14,15 +14,11 @@ interface TTSContextValue {
   isTTSActive: boolean;
   isTTSPaused: boolean;
   isTTSSupported: boolean;
-  ttsRate: number;
-  useSyncedSpeed: boolean;
   startTTS: () => void;
   pauseTTS: () => void;
   resumeTTS: () => void;
   stopTTS: () => void;
   toggleTTS: () => void;
-  setTTSRate: (rate: number) => void;
-  setUseSyncedSpeed: (synced: boolean) => void;
 }
 
 const TTSContext = createContext<TTSContextValue | null>(null);
@@ -34,8 +30,6 @@ export function TTSProvider({ children }: { children: ReactNode }) {
   const ttsRef = useRef(new TextToSpeechService());
   const [isTTSActive, setIsTTSActive] = useState(false);
   const [isTTSPaused, setIsTTSPaused] = useState(false);
-  const [ttsRate, setTTSRateState] = useState(1.0);
-  const [useSyncedSpeed, setUseSyncedSpeed] = useState(true);
 
   const isTTSSupported = typeof window !== "undefined" && "speechSynthesis" in window;
 
@@ -68,28 +62,23 @@ export function TTSProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (doc) {
-      const words = doc.tokens.map((token) => token.word);
+      const words = doc.tokens.map((token) => token.displayWord);
       ttsRef.current.loadWords(words);
     }
   }, [doc]);
 
   useEffect(() => {
-    if (useSyncedSpeed) {
-      const syncedRate = TextToSpeechService.rateFromWpm(settings.wordsPerMinute);
-      ttsRef.current.setRate(syncedRate);
-      setTTSRateState(syncedRate);
-    }
-  }, [settings.wordsPerMinute, useSyncedSpeed]);
+    const rate = TextToSpeechService.rateFromWpm(settings.wordsPerMinute);
+    ttsRef.current.setRate(rate);
+  }, [settings.wordsPerMinute]);
 
   const startTTS = useCallback(() => {
     if (!doc) return;
     pauseRSVP();
-    const rate = useSyncedSpeed
-      ? TextToSpeechService.rateFromWpm(settings.wordsPerMinute)
-      : ttsRate;
+    const rate = TextToSpeechService.rateFromWpm(settings.wordsPerMinute);
     ttsRef.current.setRate(rate);
     ttsRef.current.speak(currentIndex);
-  }, [doc, currentIndex, pauseRSVP, settings.wordsPerMinute, ttsRate, useSyncedSpeed]);
+  }, [doc, currentIndex, pauseRSVP, settings.wordsPerMinute]);
 
   const pauseTTS = useCallback(() => {
     ttsRef.current.pause();
@@ -119,26 +108,15 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     startTTS();
   }, [isTTSActive, isTTSPaused, startTTS, pauseTTS, resumeTTS]);
 
-  const setTTSRate = useCallback((rate: number) => {
-    const clampedRate = Math.max(0.5, Math.min(4.0, rate));
-    setTTSRateState(clampedRate);
-    setUseSyncedSpeed(false);
-    ttsRef.current.setRate(clampedRate);
-  }, []);
-
   const contextValue: TTSContextValue = {
     isTTSActive,
     isTTSPaused,
     isTTSSupported,
-    ttsRate,
-    useSyncedSpeed,
     startTTS,
     pauseTTS,
     resumeTTS,
     stopTTS,
     toggleTTS,
-    setTTSRate,
-    setUseSyncedSpeed,
   };
 
   return (

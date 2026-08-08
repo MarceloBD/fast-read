@@ -132,36 +132,7 @@
   font-size: 11px;
   color: var(--color-accent);
   white-space: nowrap;
-}
-
-.ttsControls {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 4px 0;
-}
-
-.ttsLabel {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.ttsRateControl {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ttsRateValue {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text);
-  min-width: 60px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+  gap: 4px;
 }

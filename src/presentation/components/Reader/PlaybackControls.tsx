@@ -7,7 +7,7 @@ import styles from "./PlaybackControls.module.css";
 export function PlaybackControls() {
   const { state, togglePlayPause, seekTo, updateSettings, loadDocument } =
     useReader();
-  const { isTTSActive, isTTSPaused, isTTSSupported, ttsRate, useSyncedSpeed, toggleTTS, stopTTS, setTTSRate, setUseSyncedSpeed } =
+  const { isTTSActive, isTTSPaused, isTTSSupported, toggleTTS, stopTTS } =
     useTTS();
   const { document: doc, currentIndex, isPlaying, settings } = state;
 
@@ -38,14 +38,6 @@ export function PlaybackControls() {
     window.location.reload();
   };
 
-  const handleTTSRateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTTSRate(Number(event.target.value));
-  };
-
-  const handleSyncToggle = () => {
-    setUseSyncedSpeed(!useSyncedSpeed);
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.progressBar} onClick={handleProgressClick}>
@@ -59,11 +51,11 @@ export function PlaybackControls() {
         <div className={styles.leftControls}>
           <button
             className={styles.playButton}
-            onClick={togglePlayPause}
-            disabled={!doc || isTTSActive}
+            onClick={isTTSActive ? toggleTTS : togglePlayPause}
+            disabled={!doc}
             title="Play/Pause (Space)"
           >
-            {isPlaying ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+            {(isPlaying || (isTTSActive && !isTTSPaused)) ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
           </button>
 
           {isTTSSupported && (
@@ -132,35 +124,6 @@ export function PlaybackControls() {
           />
         </div>
       </div>
-
-      {isTTSActive && (
-        <div className={styles.ttsControls}>
-          <label className={styles.ttsLabel}>
-            <input
-              type="checkbox"
-              checked={useSyncedSpeed}
-              onChange={handleSyncToggle}
-            />
-            Sync voice speed to WPM
-          </label>
-          {!useSyncedSpeed && (
-            <div className={styles.ttsRateControl}>
-              <span className={styles.ttsRateValue}>
-                Voice: {ttsRate.toFixed(1)}x
-              </span>
-              <input
-                type="range"
-                min={0.5}
-                max={4.0}
-                step={0.1}
-                value={ttsRate}
-                onChange={handleTTSRateChange}
-                className={styles.speedSlider}
-              />
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

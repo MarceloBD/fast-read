@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: "Fast Read — RSVP Speed Reading",
   description: DESCRIPTION,
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   alternates: {
     canonical: "/",
   },

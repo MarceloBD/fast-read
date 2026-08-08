@@ -16,7 +16,7 @@ export function useKeyboardControls(): void {
     updateSettings,
   } = useReader();
 
-  const { toggleTTS } = useTTS();
+  const { isTTSActive, toggleTTS } = useTTS();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -33,6 +33,8 @@ export function useKeyboardControls(): void {
           event.preventDefault();
           if (state.isPausedOnSpecialContent) {
             continueFromSpecialContent();
+          } else if (isTTSActive) {
+            toggleTTS();
           } else {
             togglePlayPause();
           }
@@ -102,6 +104,7 @@ export function useKeyboardControls(): void {
     continueFromSpecialContent,
     loadDocument,
     updateSettings,
+    isTTSActive,
     toggleTTS,
   ]);
 }
