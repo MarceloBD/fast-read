@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "Fast Read — RSVP Speed Reading",
   description: DESCRIPTION,
   metadataBase: new URL(SITE_URL),
+  verification: {
+    google: "6vzZD0heq5T-PiL170brMzDEgK9_S_cOhpkvsqUvDuM",
+  },
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",

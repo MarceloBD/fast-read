@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useReader } from "../../context/ReaderContext";
+import { useTTS } from "../../context/TTSContext";
 import { useKeyboardControls } from "../../hooks/useKeyboardControls";
 import { WordDisplay } from "../Reader/WordDisplay";
 import { PlaybackControls } from "../Reader/PlaybackControls";
@@ -15,12 +16,23 @@ import styles from "./AppShell.module.css";
 export function AppShell() {
   useKeyboardControls();
 
-  const { state, updateSettings } = useReader();
+  const { state, updateSettings, seekTo, play } = useReader();
+  const { isTTSEnabled, startTTS, stopSpeech } = useTTS();
   const { document: doc, currentIndex, settings } = state;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFullTextOpen, setIsFullTextOpen] = useState(false);
 
   const currentToken = doc?.tokens[currentIndex] ?? null;
+
+  const handleContextWordClick = useCallback((index: number) => {
+    stopSpeech();
+    seekTo(index);
+    if (isTTSEnabled) {
+      startTTS(index);
+    } else {
+      play();
+    }
+  }, [seekTo, play, isTTSEnabled, startTTS, stopSpeech]);
 
   const handleToggleMode = useCallback(() => {
     const nextMode =
@@ -76,6 +88,7 @@ export function AppShell() {
                 tokens={doc.tokens}
                 currentIndex={currentIndex}
                 contextFontSize={settings.contextFontSize}
+                onWordClick={handleContextWordClick}
               />
             </div>
           </main>

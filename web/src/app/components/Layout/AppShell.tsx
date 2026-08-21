@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { ReaderProvider, useReader } from "../../context/ReaderContext";
 import { ThemeProvider } from "../../context/ThemeContext";
-import { TTSProvider } from "../../context/TTSContext";
+import { TTSProvider, useTTS } from "../../context/TTSContext";
 import { useKeyboardControls } from "../../hooks/useKeyboardControls";
 import { WordDisplay } from "../Reader/WordDisplay";
 import { PlaybackControls } from "../Reader/PlaybackControls";
@@ -19,12 +19,23 @@ import styles from "./AppShell.module.css";
 function ReaderUI() {
   useKeyboardControls();
 
-  const { state, updateSettings } = useReader();
+  const { state, updateSettings, seekTo, play } = useReader();
+  const { isTTSEnabled, startTTS, stopSpeech } = useTTS();
   const { document: doc, currentIndex, settings } = state;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFullTextOpen, setIsFullTextOpen] = useState(false);
 
   const currentToken = doc?.tokens[currentIndex] ?? null;
+
+  const handleContextWordClick = useCallback((index: number) => {
+    stopSpeech();
+    seekTo(index);
+    if (isTTSEnabled) {
+      startTTS(index);
+    } else {
+      play();
+    }
+  }, [seekTo, play, isTTSEnabled, startTTS, stopSpeech]);
 
   const handleToggleMode = useCallback(() => {
     const nextMode =
@@ -80,6 +91,7 @@ function ReaderUI() {
                 tokens={doc.tokens}
                 currentIndex={currentIndex}
                 contextFontSize={settings.contextFontSize}
+                onWordClick={handleContextWordClick}
               />
             </div>
           </main>

@@ -20,10 +20,11 @@ interface TTSContextValue {
   availableVoices: SpeechSynthesisVoice[];
   selectedVoice: SpeechSynthesisVoice | null;
   setVoice: (voice: SpeechSynthesisVoice | null) => void;
-  startTTS: () => void;
+  startTTS: (fromIndex?: number) => void;
   pauseTTS: () => void;
   resumeTTS: () => void;
   stopTTS: () => void;
+  stopSpeech: () => void;
   toggleTTSEnabled: () => void;
   toggleTTSPlayPause: () => void;
 }
@@ -111,15 +112,16 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     ttsRef.current?.setRate(rate);
   }, [settings.wordsPerMinute]);
 
-  const startTTS = useCallback(() => {
+  const startTTS = useCallback((fromIndex?: number) => {
     if (!doc || !ttsRef.current) return;
     pauseRSVP();
     const rate = TextToSpeechService.rateFromWpm(settings.wordsPerMinute);
     ttsRef.current.setRate(rate);
 
-    const isAtEnd = currentIndex >= (doc.totalWords - 1);
-    const speakFrom = isAtEnd ? 0 : currentIndex;
+    let speakFrom = fromIndex ?? currentIndex;
+    const isAtEnd = speakFrom >= (doc.totalWords - 1);
     if (isAtEnd) {
+      speakFrom = 0;
       seekTo(0);
     }
     ttsRef.current.speak(speakFrom);
@@ -136,6 +138,12 @@ export function TTSProvider({ children }: { children: ReactNode }) {
   const stopTTS = useCallback(() => {
     ttsRef.current?.stop();
     setIsTTSEnabled(false);
+    setIsTTSSpeaking(false);
+    setIsTTSPaused(false);
+  }, []);
+
+  const stopSpeech = useCallback(() => {
+    ttsRef.current?.stop();
     setIsTTSSpeaking(false);
     setIsTTSPaused(false);
   }, []);
@@ -189,6 +197,7 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     pauseTTS,
     resumeTTS,
     stopTTS,
+    stopSpeech,
     toggleTTSEnabled,
     toggleTTSPlayPause,
   };

@@ -24,6 +24,7 @@ export function PlaybackControls() {
     toggleTTSEnabled,
     toggleTTSPlayPause,
     stopTTS,
+    stopSpeech,
   } = useTTS();
   const { document: doc, currentIndex, isPlaying, settings } = state;
 
@@ -44,7 +45,7 @@ export function PlaybackControls() {
   };
 
   const handleRestart = () => {
-    stopTTS();
+    stopSpeech();
     if (doc) loadDocument(doc);
   };
 
