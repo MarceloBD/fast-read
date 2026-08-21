@@ -11,7 +11,8 @@ import { TextToSpeechService } from "../../application/services/TextToSpeechServ
 import { useReader } from "./ReaderContext";
 
 interface TTSContextValue {
-  isTTSActive: boolean;
+  isTTSEnabled: boolean;
+  isTTSSpeaking: boolean;
   isTTSPaused: boolean;
   isTTSSupported: boolean;
   availableVoices: SpeechSynthesisVoice[];
@@ -22,7 +23,7 @@ interface TTSContextValue {
   resumeTTS: () => void;
   stopTTS: () => void;
   toggleTTSEnabled: () => void;
-  toggleTTSPause: () => void;
+  toggleTTSPlayPause: () => void;
 }
 
 const TTSContext = createContext<TTSContextValue | null>(null);
@@ -32,7 +33,8 @@ export function TTSProvider({ children }: { children: ReactNode }) {
   const { document: doc, currentIndex, settings } = state;
 
   const ttsRef = useRef(new TextToSpeechService());
-  const [isTTSActive, setIsTTSActive] = useState(false);
+  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
+  const [isTTSSpeaking, setIsTTSSpeaking] = useState(false);
   const [isTTSPaused, setIsTTSPaused] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
@@ -70,11 +72,11 @@ export function TTSProvider({ children }: { children: ReactNode }) {
         seekTo(wordIndex);
       },
       onComplete: () => {
-        setIsTTSActive(false);
+        setIsTTSSpeaking(false);
         setIsTTSPaused(false);
       },
       onStart: () => {
-        setIsTTSActive(true);
+        setIsTTSSpeaking(true);
         setIsTTSPaused(false);
       },
       onPause: () => {
@@ -107,8 +109,14 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     pauseRSVP();
     const rate = TextToSpeechService.rateFromWpm(settings.wordsPerMinute);
     ttsRef.current.setRate(rate);
-    ttsRef.current.speak(currentIndex);
-  }, [doc, currentIndex, pauseRSVP, settings.wordsPerMinute]);
+
+    const isAtEnd = currentIndex >= (doc.totalWords - 1);
+    const speakFrom = isAtEnd ? 0 : currentIndex;
+    if (isAtEnd) {
+      seekTo(0);
+    }
+    ttsRef.current.speak(speakFrom);
+  }, [doc, currentIndex, pauseRSVP, seekTo, settings.wordsPerMinute]);
 
   const pauseTTS = useCallback(() => {
     ttsRef.current.pause();
@@ -120,27 +128,37 @@ export function TTSProvider({ children }: { children: ReactNode }) {
 
   const stopTTS = useCallback(() => {
     ttsRef.current.stop();
-    setIsTTSActive(false);
+    setIsTTSEnabled(false);
+    setIsTTSSpeaking(false);
     setIsTTSPaused(false);
   }, []);
 
   const toggleTTSEnabled = useCallback(() => {
-    if (isTTSActive) {
-      stopTTS();
+    if (isTTSEnabled) {
+      ttsRef.current.stop();
+      setIsTTSEnabled(false);
+      setIsTTSSpeaking(false);
+      setIsTTSPaused(false);
       return;
     }
-    startTTS();
-  }, [isTTSActive, startTTS, stopTTS]);
+    setIsTTSEnabled(true);
+  }, [isTTSEnabled]);
 
-  const toggleTTSPause = useCallback(() => {
-    if (!isTTSActive) return;
+  const toggleTTSPlayPause = useCallback(() => {
+    if (!isTTSEnabled) return;
+
+    if (isTTSSpeaking && !isTTSPaused) {
+      pauseTTS();
+      return;
+    }
 
     if (isTTSPaused) {
       resumeTTS();
-    } else {
-      pauseTTS();
+      return;
     }
-  }, [isTTSActive, isTTSPaused, pauseTTS, resumeTTS]);
+
+    startTTS();
+  }, [isTTSEnabled, isTTSSpeaking, isTTSPaused, pauseTTS, resumeTTS, startTTS]);
 
   const setVoice = useCallback((voice: SpeechSynthesisVoice | null) => {
     setSelectedVoice(voice);
@@ -153,7 +171,8 @@ export function TTSProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const contextValue: TTSContextValue = {
-    isTTSActive,
+    isTTSEnabled,
+    isTTSSpeaking,
     isTTSPaused,
     isTTSSupported,
     availableVoices,
@@ -164,7 +183,7 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     resumeTTS,
     stopTTS,
     toggleTTSEnabled,
-    toggleTTSPause,
+    toggleTTSPlayPause,
   };
 
   return (

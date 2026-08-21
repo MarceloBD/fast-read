@@ -3,19 +3,32 @@
 import { useReader } from "../../context/ReaderContext";
 import { useTTS } from "../../context/TTSContext";
 import { ReadingSettings } from "../../../domain/value-objects/ReadingSettings";
-import { PlayIcon, PauseIcon, VolumeIcon, VolumeMuteIcon, RestartIcon, DocumentIcon } from "../Icons/Icons";
+import {
+  PlayIcon,
+  PauseIcon,
+  VolumeIcon,
+  VolumeMuteIcon,
+  RestartIcon,
+  DocumentIcon,
+} from "../Icons/Icons";
 import styles from "./PlaybackControls.module.css";
 
 export function PlaybackControls() {
   const { state, togglePlayPause, seekTo, updateSettings, loadDocument } =
     useReader();
-  const { isTTSActive, isTTSPaused, isTTSSupported, toggleTTSEnabled, toggleTTSPause, stopTTS } =
-    useTTS();
+  const {
+    isTTSEnabled,
+    isTTSSpeaking,
+    isTTSPaused,
+    isTTSSupported,
+    toggleTTSEnabled,
+    toggleTTSPlayPause,
+    stopTTS,
+  } = useTTS();
   const { document: doc, currentIndex, isPlaying, settings } = state;
 
   const totalWords = doc?.totalWords ?? 0;
-  const progress =
-    totalWords > 1 ? (currentIndex / (totalWords - 1)) * 100 : 0;
+  const progress = totalWords > 1 ? (currentIndex / (totalWords - 1)) * 100 : 0;
 
   const handleProgressClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!doc) return;
@@ -53,21 +66,29 @@ export function PlaybackControls() {
         <div className={styles.leftControls}>
           <button
             className={styles.playButton}
-            onClick={isTTSActive ? toggleTTSPause : togglePlayPause}
+            onClick={isTTSEnabled ? toggleTTSPlayPause : togglePlayPause}
             disabled={!doc}
             title="Play/Pause (Space)"
           >
-            {(isPlaying || (isTTSActive && !isTTSPaused)) ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+            {isPlaying || (isTTSSpeaking && !isTTSPaused) ? (
+              <PauseIcon size={18} />
+            ) : (
+              <PlayIcon size={18} />
+            )}
           </button>
 
           {isTTSSupported && (
             <button
-              className={`${styles.iconButton} ${isTTSActive ? styles.ttsActive : ""}`}
+              className={`${styles.iconButton} ${isTTSEnabled ? styles.ttsActive : ""}`}
               onClick={toggleTTSEnabled}
               disabled={!doc}
-              title={isTTSActive ? "Disable voice (T)" : "Enable voice (T)"}
+              title={isTTSEnabled ? "Disable voice (T)" : "Enable voice (T)"}
             >
-              {isTTSActive ? <VolumeIcon size={16} /> : <VolumeMuteIcon size={16} />}
+              {isTTSEnabled ? (
+                <VolumeIcon size={16} />
+              ) : (
+                <VolumeMuteIcon size={16} />
+              )}
             </button>
           )}
 
@@ -93,11 +114,6 @@ export function PlaybackControls() {
           <span className={styles.wordCount}>
             {currentIndex + 1} / {totalWords}
           </span>
-          {isTTSActive && (
-            <span className={styles.ttsIndicator}>
-              {isTTSPaused ? <><VolumeMuteIcon size={12} /> Paused</> : <><VolumeIcon size={12} /> Speaking</>}
-            </span>
-          )}
         </div>
 
         <div className={styles.speedControls}>
