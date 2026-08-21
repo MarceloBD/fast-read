@@ -71,16 +71,6 @@ export function PlaybackControls() {
             </button>
           )}
 
-          {isTTSActive && (
-            <button
-              className={styles.iconButton}
-              onClick={stopTTS}
-              title="Stop voice"
-            >
-              <StopIcon size={16} />
-            </button>
-          )}
-
           <button
             className={styles.iconButton}
             onClick={handleRestart}

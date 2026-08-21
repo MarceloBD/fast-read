@@ -16,6 +16,9 @@ interface TTSContextValue {
   isTTSActive: boolean;
   isTTSPaused: boolean;
   isTTSSupported: boolean;
+  availableVoices: SpeechSynthesisVoice[];
+  selectedVoice: SpeechSynthesisVoice | null;
+  setVoice: (voice: SpeechSynthesisVoice | null) => void;
   startTTS: () => void;
   pauseTTS: () => void;
   resumeTTS: () => void;
@@ -36,8 +39,34 @@ export function TTSProvider({ children }: { children: ReactNode }) {
   }
   const [isTTSActive, setIsTTSActive] = useState(false);
   const [isTTSPaused, setIsTTSPaused] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
 
   const isTTSSupported = typeof window !== "undefined" && "speechSynthesis" in window;
+
+  useEffect(() => {
+    if (!isTTSSupported) return;
+
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+
+      const savedVoiceUri = localStorage.getItem("tts-voice-uri");
+      if (savedVoiceUri) {
+        const saved = voices.find((voice) => voice.voiceURI === savedVoiceUri);
+        if (saved) {
+          setSelectedVoice(saved);
+          ttsRef.current?.setVoice(saved);
+        }
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+    };
+  }, [isTTSSupported]);
 
   useEffect(() => {
     const tts = ttsRef.current;
@@ -120,10 +149,23 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     }
   }, [isTTSActive, isTTSPaused, pauseTTS, resumeTTS]);
 
+  const setVoice = useCallback((voice: SpeechSynthesisVoice | null) => {
+    setSelectedVoice(voice);
+    ttsRef.current?.setVoice(voice);
+    if (voice) {
+      localStorage.setItem("tts-voice-uri", voice.voiceURI);
+    } else {
+      localStorage.removeItem("tts-voice-uri");
+    }
+  }, []);
+
   const contextValue: TTSContextValue = {
     isTTSActive,
     isTTSPaused,
     isTTSSupported,
+    availableVoices,
+    selectedVoice,
+    setVoice,
     startTTS,
     pauseTTS,
     resumeTTS,

@@ -13,6 +13,7 @@ export class TextToSpeechService {
   private isActive = false;
   private isPausedState = false;
   private rate = 1.0;
+  private selectedVoice: SpeechSynthesisVoice | null = null;
   private words: string[] = [];
   private currentWordIndex = 0;
   private startFromIndex = 0;
@@ -68,6 +69,11 @@ export class TextToSpeechService {
     this.utterance = new SpeechSynthesisUtterance(textToSpeak);
     this.utterance.rate = this.rate;
     this.utterance.pitch = 1.0;
+
+    if (this.selectedVoice) {
+      this.utterance.voice = this.selectedVoice;
+      this.utterance.lang = this.selectedVoice.lang;
+    }
 
     this.utterance.onstart = () => {
       this.isActive = true;
@@ -139,6 +145,20 @@ export class TextToSpeechService {
 
   getVoices(): SpeechSynthesisVoice[] {
     return this.synthesis.getVoices();
+  }
+
+  setVoice(voice: SpeechSynthesisVoice | null): void {
+    this.selectedVoice = voice;
+
+    if (this.isActive && !this.isPausedState) {
+      const resumeIndex = this.currentWordIndex;
+      this.cancelSpeech();
+      this.speakFromIndex(resumeIndex);
+    }
+  }
+
+  getSelectedVoice(): SpeechSynthesisVoice | null {
+    return this.selectedVoice;
   }
 
   destroy(): void {

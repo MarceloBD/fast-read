@@ -1,9 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 const SITE_URL = "https://fast-read.vercel.app";
 const SITE_NAME = "Fast Read";
 const DESCRIPTION = "Free RSVP speed reading app. Read one word at a time at up to 1500 WPM. Supports PDF, EPUB, Markdown, and TXT.";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "Fast Read — RSVP Speed Reading",

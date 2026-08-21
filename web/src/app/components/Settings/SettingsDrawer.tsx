@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useReader } from "../../context/ReaderContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useTTS } from "../../context/TTSContext";
 import { ThemeType } from "../../../domain/enums/ThemeType";
 import { ReadingSettings } from "../../../domain/value-objects/ReadingSettings";
 import { CloseIcon } from "../Icons/Icons";
@@ -19,10 +21,30 @@ const THEME_OPTIONS: { value: ThemeType; label: string }[] = [
   { value: ThemeType.HIGH_CONTRAST, label: "High Contrast" },
 ];
 
+interface VoiceGroup {
+  language: string;
+  voices: SpeechSynthesisVoice[];
+}
+
 export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
   const { state, updateSettings } = useReader();
   const { currentTheme, setTheme } = useTheme();
+  const { availableVoices, selectedVoice, setVoice, isTTSSupported } = useTTS();
   const { settings } = state;
+
+  const voicesByLanguage = useMemo((): VoiceGroup[] => {
+    const grouped = new Map<string, SpeechSynthesisVoice[]>();
+    for (const voice of availableVoices) {
+      const langCode = voice.lang.split("-")[0];
+      const displayLang = new Intl.DisplayNames(["en"], { type: "language" }).of(langCode) ?? langCode;
+      const existing = grouped.get(displayLang) ?? [];
+      existing.push(voice);
+      grouped.set(displayLang, existing);
+    }
+    return Array.from(grouped.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([language, voices]) => ({ language, voices }));
+  }, [availableVoices]);
 
   if (!isOpen) return null;
 
@@ -39,6 +61,29 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
   const handleSpeedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const wordsPerMinute = Number(event.target.value);
     updateSettings(settings.withWordsPerMinute(wordsPerMinute));
+  };
+
+  const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const voiceUri = event.target.value;
+    if (!voiceUri) {
+      setVoice(null);
+      return;
+    }
+    const voice = availableVoices.find((v) => v.voiceURI === voiceUri) ?? null;
+    setVoice(voice);
+  };
+
+  const handleOpenVoiceSettings = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes("win")) {
+      window.open("ms-settings:speech", "_blank");
+    } else if (userAgent.includes("mac")) {
+      window.open("x-apple.systempreferences:com.apple.preference.universalaccess?TextToSpeech", "_blank");
+    } else if (userAgent.includes("android")) {
+      window.open("intent://com.android.settings.TTS_SETTINGS#Intent;scheme=android-app;end", "_blank");
+    } else {
+      window.open("https://support.google.com/chrome/answer/9015266", "_blank");
+    }
   };
 
   return (
@@ -122,6 +167,39 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
             <span>{ReadingSettings.maxWpm}</span>
           </div>
         </div>
+
+        {isTTSSupported && availableVoices.length > 0 && (
+          <div className={styles.section}>
+            <label className={styles.label}>Voice</label>
+            <select
+              className={styles.voiceSelect}
+              value={selectedVoice?.voiceURI ?? ""}
+              onChange={handleVoiceChange}
+            >
+              <option value="">System Default</option>
+              {voicesByLanguage.map(({ language, voices }) => (
+                <optgroup key={language} label={language}>
+                  {voices.map((voice) => (
+                    <option key={voice.voiceURI} value={voice.voiceURI}>
+                      {voice.name} ({voice.lang})
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <button
+              className={styles.voiceHelpButton}
+              onClick={handleOpenVoiceSettings}
+              type="button"
+            >
+              Download more voices
+            </button>
+            <p className={styles.voiceHelpText}>
+              Opens your system speech settings where you can install additional languages and voices.
+              After installing, refresh this page to see new voices.
+            </p>
+          </div>
+        )}
 
         <div className={styles.section}>
           <label className={styles.label}>Reading Modes</label>
