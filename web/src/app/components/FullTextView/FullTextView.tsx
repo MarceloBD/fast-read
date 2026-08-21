@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useReader } from "../../context/ReaderContext";
+import { useTTS } from "../../context/TTSContext";
 import { useTranslation } from "../../context/TranslationContext";
 import { ContentType } from "../../../domain/enums/ContentType";
 import { CloseIcon } from "../Icons/Icons";
@@ -13,7 +14,8 @@ interface FullTextViewProps {
 }
 
 export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
-  const { state, seekTo, pause } = useReader();
+  const { state, seekTo, play } = useReader();
+  const { isTTSEnabled, startTTS, stopSpeech } = useTTS();
   const { translateWord } = useTranslation();
   const { document: doc, currentIndex } = state;
   const currentWordRef = useRef<HTMLSpanElement>(null);
@@ -24,6 +26,12 @@ export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
       currentWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && currentWordRef.current) {
+      currentWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isOpen, currentIndex]);
 
   useEffect(() => {
     return () => {
@@ -46,12 +54,16 @@ export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
 
       clickTimeoutRef.current = setTimeout(() => {
         clickTimeoutRef.current = null;
-        pause();
+        stopSpeech();
         seekTo(tokenIndex);
-        onClose();
+        if (isTTSEnabled) {
+          startTTS(tokenIndex);
+        } else {
+          play();
+        }
       }, SINGLE_CLICK_DELAY_MS);
     },
-    [pause, seekTo, onClose, translateWord]
+    [seekTo, play, isTTSEnabled, startTTS, stopSpeech, translateWord]
   );
 
   const handleTextSelection = useCallback(() => {
@@ -86,7 +98,7 @@ export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
     <div className={styles.overlay} onKeyDown={handleKeyDown} tabIndex={-1}>
       <header className={styles.header}>
         <h2 className={styles.title}>{doc.title}</h2>
-        <span className={styles.hint}>Click to jump, double-click or select to translate</span>
+        <span className={styles.hint}>Click to play from word, double-click or select to translate</span>
         <button className={styles.closeButton} onClick={onClose} title="Close (Esc)">
           <CloseIcon size={16} />
         </button>

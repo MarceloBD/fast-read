@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import styles from "./terms.module.css";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Fast Read",
+  title: "Terms of Service",
   description: "Terms of service for Fast Read speed reading application.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 export default function TermsPage() {
@@ -77,9 +81,9 @@ export default function TermsPage() {
       <footer className={styles.footer}>
         <p>&copy; {new Date().getFullYear()} Fast Read. All rights reserved.</p>
         <nav>
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/privacy">Privacy Policy</a>
+          <Link href="/">Home</Link>
+          <Link href="/about">About</Link>
+          <Link href="/privacy">Privacy Policy</Link>
         </nav>
       </footer>
     </article>

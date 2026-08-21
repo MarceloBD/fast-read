@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import styles from "./privacy.module.css";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Fast Read",
-  description: "Privacy policy for Fast Read speed reading application.",
+  title: "Privacy Policy",
+  description:
+    "Privacy policy for Fast Read speed reading application. Learn how we protect your data.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 export default function PrivacyPage() {
@@ -75,6 +80,16 @@ export default function PrivacyPage() {
       </section>
 
       <section>
+        <h2>Translation</h2>
+        <p>
+          The built-in translation feature sends only the selected word or phrase to the
+          MyMemory translation API (<a href="https://mymemory.translated.net" target="_blank" rel="noopener noreferrer">mymemory.translated.net</a>).
+          No full documents or surrounding context are transmitted. Translations are cached
+          locally to minimize external requests.
+        </p>
+      </section>
+
+      <section>
         <h2>Changes to This Policy</h2>
         <p>
           We may update this privacy policy from time to time. Any changes will be reflected
@@ -93,8 +108,9 @@ export default function PrivacyPage() {
       <footer className={styles.footer}>
         <p>&copy; {new Date().getFullYear()} Fast Read. All rights reserved.</p>
         <nav>
-          <a href="/">Home</a>
-          <a href="/about">About</a>
+          <Link href="/">Home</Link>
+          <Link href="/about">About</Link>
+          <Link href="/terms">Terms of Service</Link>
         </nav>
       </footer>
     </article>
