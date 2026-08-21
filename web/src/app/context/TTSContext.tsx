@@ -10,6 +10,10 @@ import {
   type ReactNode,
 } from "react";
 import { TextToSpeechService } from "../../application/services/TextToSpeechService";
+import {
+  detectTextLanguage,
+  findVoiceForLanguage,
+} from "../../application/services/LanguageVoiceService";
 import { useReader } from "./ReaderContext";
 
 interface TTSContextValue {
@@ -148,6 +152,27 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     setIsTTSPaused(false);
   }, []);
 
+  const autoSelectVoiceForText = useCallback(() => {
+    if (!doc || availableVoices.length === 0) return;
+
+    const sampleText = doc.tokens
+      .slice(0, Math.min(100, doc.tokens.length))
+      .map((token) => token.displayWord)
+      .join(" ");
+
+    const detectedLanguage = detectTextLanguage(sampleText);
+    if (!detectedLanguage) return;
+
+    const currentVoiceLang = selectedVoice?.lang.split("-")[0].toLowerCase();
+    if (currentVoiceLang === detectedLanguage.split("-")[0].toLowerCase()) return;
+
+    const matchingVoice = findVoiceForLanguage(availableVoices, detectedLanguage);
+    if (!matchingVoice) return;
+
+    setSelectedVoice(matchingVoice);
+    ttsRef.current?.setVoice(matchingVoice);
+  }, [doc, availableVoices, selectedVoice]);
+
   const toggleTTSEnabled = useCallback(() => {
     if (isTTSEnabled) {
       ttsRef.current?.stop();
@@ -156,8 +181,9 @@ export function TTSProvider({ children }: { children: ReactNode }) {
       setIsTTSPaused(false);
       return;
     }
+    autoSelectVoiceForText();
     setIsTTSEnabled(true);
-  }, [isTTSEnabled]);
+  }, [isTTSEnabled, autoSelectVoiceForText]);
 
   const toggleTTSPlayPause = useCallback(() => {
     if (!isTTSEnabled) return;

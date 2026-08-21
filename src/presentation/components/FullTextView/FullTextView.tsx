@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useReader } from "../../context/ReaderContext";
+import { useTranslation } from "../../context/TranslationContext";
 import { ContentType } from "../../../domain/enums/ContentType";
 import { CloseIcon } from "../Icons/Icons";
 import styles from "./FullTextView.module.css";
+
+const SINGLE_CLICK_DELAY_MS = 250;
 
 interface FullTextViewProps {
   isOpen: boolean;
@@ -11,8 +14,10 @@ interface FullTextViewProps {
 
 export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
   const { state, seekTo, pause } = useReader();
+  const { translateWord } = useTranslation();
   const { document: doc, currentIndex } = state;
   const currentWordRef = useRef<HTMLSpanElement>(null);
+  const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (isOpen && currentWordRef.current) {
@@ -20,14 +25,51 @@ export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+    };
+  }, []);
+
   const handleWordClick = useCallback(
-    (tokenIndex: number) => {
-      pause();
-      seekTo(tokenIndex);
-      onClose();
+    (event: React.MouseEvent<HTMLSpanElement>, tokenIndex: number, word: string) => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      }
+
+      if (event.detail >= 2) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        translateWord(word, rect);
+        return;
+      }
+
+      clickTimeoutRef.current = setTimeout(() => {
+        clickTimeoutRef.current = null;
+        pause();
+        seekTo(tokenIndex);
+        onClose();
+      }, SINGLE_CLICK_DELAY_MS);
     },
-    [pause, seekTo, onClose]
+    [pause, seekTo, onClose, translateWord]
   );
+
+  const handleTextSelection = useCallback(() => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim();
+
+    if (!selectedText || selectedText.split(/\s+/).length < 2) return;
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+    }
+
+    const range = selection!.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    translateWord(selectedText, rect);
+    selection!.removeAllRanges();
+  }, [translateWord]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -44,13 +86,13 @@ export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
     <div className={styles.overlay} onKeyDown={handleKeyDown} tabIndex={-1}>
       <header className={styles.header}>
         <h2 className={styles.title}>{doc.title}</h2>
-        <span className={styles.hint}>Click any word to start reading from there</span>
+        <span className={styles.hint}>Click to jump, double-click or select to translate</span>
         <button className={styles.closeButton} onClick={onClose} title="Close (Esc)">
           <CloseIcon size={16} />
         </button>
       </header>
 
-      <article className={styles.content}>
+      <article className={styles.content} onMouseUp={handleTextSelection}>
         {doc.blocks.map((block, blockIndex) => {
           if (block.type === ContentType.CODE) {
             return (
@@ -107,7 +149,7 @@ export function FullTextView({ isOpen, onClose }: FullTextViewProps) {
           key={wordIndexInBlock}
           ref={isCurrent ? currentWordRef : undefined}
           className={`${styles.word} ${isCurrent ? styles.currentWord : ""}`}
-          onClick={() => handleWordClick(tokenIndex)}
+          onClick={(event) => handleWordClick(event, tokenIndex, displayText)}
         >
           {displayText}{" "}
         </span>

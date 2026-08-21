@@ -1,0 +1,143 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 1001;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 160px;
+  max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.originalRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.originalWord {
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  color: var(--color-text);
+}
+
+.speakButton {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.speakButton:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.speakButtonActive {
+  color: var(--color-accent);
+  background-color: rgba(var(--color-accent-rgb, 99, 102, 241), 0.15);
+  border-color: var(--color-accent);
+}
+
+.translationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.translatedText {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.4;
+  word-break: break-word;
+  flex: 1;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}

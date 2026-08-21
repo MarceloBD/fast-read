@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { ReaderProvider, useReader } from "../../context/ReaderContext";
 import { ThemeProvider } from "../../context/ThemeContext";
 import { TTSProvider, useTTS } from "../../context/TTSContext";
+import { TranslationProvider } from "../../context/TranslationContext";
 import { useKeyboardControls } from "../../hooks/useKeyboardControls";
 import { WordDisplay } from "../Reader/WordDisplay";
 import { PlaybackControls } from "../Reader/PlaybackControls";
@@ -12,6 +13,7 @@ import { DropZone } from "../FileImport/DropZone";
 import { StudyModeOverlay } from "../StudyMode/StudyModeOverlay";
 import { SettingsDrawer } from "../Settings/SettingsDrawer";
 import { FullTextView } from "../FullTextView/FullTextView";
+import { TranslationTooltip } from "../Translation/TranslationTooltip";
 import { TextViewIcon, BookIcon, BoltIcon, SettingsIcon } from "../Icons/Icons";
 import { ReadingMode } from "../../../domain/enums/ReadingMode";
 import styles from "./AppShell.module.css";
@@ -19,7 +21,7 @@ import styles from "./AppShell.module.css";
 function ReaderUI() {
   useKeyboardControls();
 
-  const { state, updateSettings, seekTo, play } = useReader();
+  const { state, updateSettings, seekTo, play, pause } = useReader();
   const { isTTSEnabled, startTTS, stopSpeech } = useTTS();
   const { document: doc, currentIndex, settings } = state;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -85,7 +87,11 @@ function ReaderUI() {
           </header>
 
           <main className={styles.readerArea}>
-            <WordDisplay token={currentToken} fontSize={settings.fontSize} />
+            <WordDisplay
+              token={currentToken}
+              fontSize={settings.fontSize}
+              onTranslateClick={pause}
+            />
             <div className={styles.contextWrapper}>
               <ContextPreview
                 tokens={doc.tokens}
@@ -120,7 +126,10 @@ export function AppShell() {
     <ReaderProvider>
       <ThemeProvider>
         <TTSProvider>
-          <ReaderUI />
+          <TranslationProvider>
+            <ReaderUI />
+            <TranslationTooltip />
+          </TranslationProvider>
         </TTSProvider>
       </ThemeProvider>
     </ReaderProvider>

@@ -16,7 +16,7 @@ import styles from "./AppShell.module.css";
 export function AppShell() {
   useKeyboardControls();
 
-  const { state, updateSettings, seekTo, play } = useReader();
+  const { state, updateSettings, seekTo, play, pause } = useReader();
   const { isTTSEnabled, startTTS, stopSpeech } = useTTS();
   const { document: doc, currentIndex, settings } = state;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -82,7 +82,11 @@ export function AppShell() {
           </header>
 
           <main className={styles.readerArea}>
-            <WordDisplay token={currentToken} fontSize={settings.fontSize} />
+            <WordDisplay
+              token={currentToken}
+              fontSize={settings.fontSize}
+              onTranslateClick={pause}
+            />
             <div className={styles.contextWrapper}>
               <ContextPreview
                 tokens={doc.tokens}

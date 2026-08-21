@@ -4,7 +4,12 @@ import { useMemo } from "react";
 import { useReader } from "../../context/ReaderContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useTTS } from "../../context/TTSContext";
+import { useTranslation } from "../../context/TranslationContext";
 import { ThemeType } from "../../../domain/enums/ThemeType";
+import {
+  TargetLanguage,
+  TARGET_LANGUAGE_LABELS,
+} from "../../../domain/enums/TargetLanguage";
 import { ReadingSettings } from "../../../domain/value-objects/ReadingSettings";
 import { CloseIcon } from "../Icons/Icons";
 import styles from "./SettingsDrawer.module.css";
@@ -30,6 +35,7 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
   const { state, updateSettings } = useReader();
   const { currentTheme, setTheme } = useTheme();
   const { availableVoices, selectedVoice, setVoice, isTTSSupported } = useTTS();
+  const { targetLanguage, setTargetLanguage } = useTranslation();
   const { settings } = state;
 
   const voicesByLanguage = useMemo((): VoiceGroup[] => {
@@ -200,6 +206,26 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
             </p>
           </div>
         )}
+
+        <div className={styles.section}>
+          <label className={styles.label}>Translation Language</label>
+          <select
+            className={styles.voiceSelect}
+            value={targetLanguage}
+            onChange={(event) =>
+              setTargetLanguage(event.target.value as TargetLanguage)
+            }
+          >
+            {Object.values(TargetLanguage).map((langCode) => (
+              <option key={langCode} value={langCode}>
+                {TARGET_LANGUAGE_LABELS[langCode]}
+              </option>
+            ))}
+          </select>
+          <p className={styles.voiceHelpText}>
+            Click the current word to translate it. Double-click words in context or full text view.
+          </p>
+        </div>
 
         <div className={styles.section}>
           <label className={styles.label}>Reading Modes</label>

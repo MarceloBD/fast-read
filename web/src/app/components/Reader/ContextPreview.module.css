@@ -29,6 +29,7 @@
   cursor: pointer;
   border-radius: 3px;
   transition: opacity 0.1s ease, background-color 0.1s ease;
+  user-select: text;
 }
 
 .word:hover {
