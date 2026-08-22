@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const SITE_URL = "https://fastread.marcelodiani.online";
+const SITE_URL = "https://fast-read.vercel.app";
 const SITE_NAME = "Fast Read";
 const DESCRIPTION =
   "Free RSVP speed reading app with text-to-speech and built-in translation. Read one word at a time at up to 1500 WPM. Supports PDF, EPUB, Markdown, HTML, and TXT.";

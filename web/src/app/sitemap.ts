@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://fastread.marcelodiani.online";
+const SITE_URL = "https://fast-read.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

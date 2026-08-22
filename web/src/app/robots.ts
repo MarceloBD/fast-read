@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://fastread.marcelodiani.online";
+const SITE_URL = "https://fast-read.vercel.app";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -38,6 +38,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: "/",
       },
     ],
-    sitemap: `${SITE_URL}/sitemap`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
