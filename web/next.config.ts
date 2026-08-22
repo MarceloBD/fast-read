@@ -26,6 +26,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  experimental: {
+    optimizeCss: true,
+  },
   webpack: (config) => {
     config.resolve.alias.canvas = false;
     return config;

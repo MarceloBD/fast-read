@@ -1,0 +1,109 @@
+.seoSection {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  line-height: 1.7;
+}
+
+.seoSection h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 16px;
+}
+
+.seoSection h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 48px 0 12px;
+}
+
+.seoSection h2:first-of-type {
+  margin-top: 32px;
+}
+
+.seoSection p {
+  color: var(--color-text-muted);
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (min-width: 600px) {
+  .featureGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.featureCard {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.featureCard h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.featureCard p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.formatList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.formatBadge {
+  padding: 6px 14px;
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.seoFooter {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.seoFooter nav {
+  display: flex;
+  gap: 16px;
+}
+
+.seoFooter a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.seoFooter a:hover {
+  color: var(--color-accent);
+}
