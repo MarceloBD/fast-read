@@ -21,11 +21,6 @@
   border-radius: 3px;
   cursor: pointer;
   overflow: hidden;
-  transition: height 0.15s ease;
-}
-
-.progressBar:hover {
-  height: 10px;
 }
 
 .progressFill {
@@ -149,9 +144,21 @@
   white-space: nowrap;
 }
 
+.remainingTime {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
 @media (min-width: 768px) {
   .wordCount {
     font-size: 13px;
+  }
+
+  .remainingTime {
+    font-size: 11px;
   }
 }
 

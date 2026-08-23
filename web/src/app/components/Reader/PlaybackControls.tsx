@@ -31,6 +31,15 @@ export function PlaybackControls() {
   const totalWords = doc?.totalWords ?? 0;
   const progress = totalWords > 1 ? (currentIndex / (totalWords - 1)) * 100 : 0;
 
+  const remainingWords = Math.max(0, totalWords - (currentIndex + 1));
+  const remainingSeconds = Math.ceil((remainingWords / settings.wordsPerMinute) * 60);
+  const remainingMinutes = Math.floor(remainingSeconds / 60);
+  const remainingSecondsRest = remainingSeconds % 60;
+  const estimatedTime =
+    remainingMinutes > 0
+      ? `${remainingMinutes}m ${remainingSecondsRest}s`
+      : `${remainingSecondsRest}s`;
+
   const handleProgressClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!doc) return;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -115,6 +124,9 @@ export function PlaybackControls() {
           <span className={styles.wordCount}>
             {currentIndex + 1} / {totalWords}
           </span>
+          {totalWords > 0 && (
+            <span className={styles.remainingTime}>{estimatedTime} left</span>
+          )}
         </div>
 
         <div className={styles.speedControls}>

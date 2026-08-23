@@ -7,8 +7,8 @@ export interface TTSCallbacks {
   onError: () => void;
 }
 
-const CHROME_KEEPALIVE_INTERVAL_MS = 10_000;
 const STARTUP_TIMEOUT_MS = 5_000;
+const MAX_CHUNK_WORDS = 50;
 const MAX_RATE = 2.0;
 const MIN_RATE = 0.5;
 
@@ -23,7 +23,6 @@ export class TextToSpeechService {
   private words: string[] = [];
   private currentWordIndex = 0;
   private startFromIndex = 0;
-  private keepAliveTimer: ReturnType<typeof setInterval> | null = null;
   private startupTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingStartFromIndex: number | null = null;
   private isWarmedUp = false;
@@ -82,15 +81,17 @@ export class TextToSpeechService {
   }
 
   private speakFromIndex(fromIndex: number): void {
-    this.cancelSpeech();
-
     this.utteranceGeneration++;
     const generation = this.utteranceGeneration;
+
+    this.cancelSpeech();
 
     this.startFromIndex = fromIndex;
     this.currentWordIndex = fromIndex;
     this.pendingStartFromIndex = fromIndex;
-    const textToSpeak = this.words.slice(fromIndex).join(" ");
+
+    const chunkEnd = Math.min(fromIndex + MAX_CHUNK_WORDS, this.words.length);
+    const textToSpeak = this.words.slice(fromIndex, chunkEnd).join(" ");
 
     if (!textToSpeak.trim()) {
       this.isActive = false;
@@ -111,15 +112,19 @@ export class TextToSpeechService {
     utterance.onstart = () => {
       if (generation !== this.utteranceGeneration) return;
       this.clearStartupTimer();
-      this.isActive = true;
-      this.startKeepAlive();
-      this.callbacks?.onStart();
+      if (!this.isActive) {
+        this.isActive = true;
+        this.callbacks?.onStart();
+      }
     };
 
     utterance.onend = () => {
       if (generation !== this.utteranceGeneration) return;
-      this.clearKeepAlive();
-      if (!this.isPausedState) {
+      if (this.isPausedState) return;
+
+      if (chunkEnd < this.words.length) {
+        this.speakFromIndex(chunkEnd);
+      } else {
         this.isActive = false;
         this.callbacks?.onComplete();
       }
@@ -137,7 +142,6 @@ export class TextToSpeechService {
 
     utterance.onerror = (event) => {
       if (generation !== this.utteranceGeneration) return;
-      this.clearKeepAlive();
       this.clearStartupTimer();
       if (event.error !== "canceled" && event.error !== "interrupted") {
         this.isActive = false;
@@ -173,29 +177,6 @@ export class TextToSpeechService {
     this.pendingStartFromIndex = null;
   }
 
-  private startKeepAlive(): void {
-    this.clearKeepAlive();
-    this.keepAliveTimer = setInterval(() => {
-      if (!this.synthesis.speaking) {
-        this.clearKeepAlive();
-        if (this.isActive && !this.isPausedState) {
-          this.isActive = false;
-          this.callbacks?.onComplete();
-        }
-        return;
-      }
-      this.synthesis.pause();
-      this.synthesis.resume();
-    }, CHROME_KEEPALIVE_INTERVAL_MS);
-  }
-
-  private clearKeepAlive(): void {
-    if (this.keepAliveTimer !== null) {
-      clearInterval(this.keepAliveTimer);
-      this.keepAliveTimer = null;
-    }
-  }
-
   pause(): void {
     if (!this.isActive || this.isPausedState) return;
     this.isPausedState = true;
@@ -224,7 +205,6 @@ export class TextToSpeechService {
   }
 
   private cancelSpeech(): void {
-    this.clearKeepAlive();
     this.clearStartupTimer();
     this.synthesis.cancel();
     this.utterance = null;
