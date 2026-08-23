@@ -10,6 +10,7 @@ import { WordDisplay } from "../Reader/WordDisplay";
 import { PlaybackControls } from "../Reader/PlaybackControls";
 import { ContextPreview } from "../Reader/ContextPreview";
 import { DropZone } from "../FileImport/DropZone";
+import { SeoSection } from "../Seo/SeoSection";
 import { StudyModeOverlay } from "../StudyMode/StudyModeOverlay";
 import { SettingsDrawer } from "../Settings/SettingsDrawer";
 import { FullTextView } from "../FullTextView/FullTextView";
@@ -48,8 +49,13 @@ function ReaderUI() {
   }, [settings, updateSettings]);
 
   return (
-    <div className={styles.shell}>
-      {!doc && <DropZone />}
+    <div className={doc ? styles.shell : styles.landingShell}>
+      {!doc && (
+        <>
+          <DropZone />
+          <SeoSection />
+        </>
+      )}
 
       {doc && (
         <div className={styles.readerLayout}>

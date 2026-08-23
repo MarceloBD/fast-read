@@ -58,6 +58,10 @@ export function TTSProvider({ children }: { children: ReactNode }) {
       const voices = window.speechSynthesis.getVoices();
       setAvailableVoices(voices);
 
+      if (voices.length > 0) {
+        ttsRef.current?.warmUp();
+      }
+
       const savedVoiceUri = localStorage.getItem("tts-voice-uri");
       if (savedVoiceUri) {
         const saved = voices.find((voice) => voice.voiceURI === savedVoiceUri);
@@ -97,6 +101,10 @@ export function TTSProvider({ children }: { children: ReactNode }) {
       onResume: () => {
         setIsTTSPaused(false);
       },
+      onError: () => {
+        setIsTTSSpeaking(false);
+        setIsTTSPaused(false);
+      },
     });
 
     return () => {
@@ -116,11 +124,24 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     ttsRef.current?.setRate(rate);
   }, [settings.wordsPerMinute]);
 
+  const recoverIfStuck = useCallback(() => {
+    const tts = ttsRef.current;
+    if (!tts) return false;
+    if (tts.isStuck) {
+      tts.forceReset();
+      setIsTTSSpeaking(false);
+      setIsTTSPaused(false);
+      return true;
+    }
+    return false;
+  }, []);
+
   const startTTS = useCallback((fromIndex?: number) => {
     if (!doc || !ttsRef.current) return;
     pauseRSVP();
+
     const rate = TextToSpeechService.rateFromWpm(settings.wordsPerMinute);
-    ttsRef.current.setRate(rate);
+    ttsRef.current.setRateWithoutRestart(rate);
 
     let speakFrom = fromIndex ?? currentIndex;
     const isAtEnd = speakFrom >= (doc.totalWords - 1);
@@ -128,6 +149,9 @@ export function TTSProvider({ children }: { children: ReactNode }) {
       speakFrom = 0;
       seekTo(0);
     }
+
+    setIsTTSSpeaking(true);
+    setIsTTSPaused(false);
     ttsRef.current.speak(speakFrom);
   }, [doc, currentIndex, pauseRSVP, seekTo, settings.wordsPerMinute]);
 
@@ -188,6 +212,22 @@ export function TTSProvider({ children }: { children: ReactNode }) {
   const toggleTTSPlayPause = useCallback(() => {
     if (!isTTSEnabled) return;
 
+    const tts = ttsRef.current;
+    if (!tts) return;
+
+    if (isTTSSpeaking && !tts.isSpeaking && !tts.isPaused) {
+      tts.forceReset();
+      setIsTTSSpeaking(false);
+      setIsTTSPaused(false);
+      startTTS();
+      return;
+    }
+
+    if (recoverIfStuck()) {
+      startTTS();
+      return;
+    }
+
     if (isTTSSpeaking && !isTTSPaused) {
       pauseTTS();
       return;
@@ -199,7 +239,7 @@ export function TTSProvider({ children }: { children: ReactNode }) {
     }
 
     startTTS();
-  }, [isTTSEnabled, isTTSSpeaking, isTTSPaused, pauseTTS, resumeTTS, startTTS]);
+  }, [isTTSEnabled, isTTSSpeaking, isTTSPaused, pauseTTS, resumeTTS, startTTS, recoverIfStuck]);
 
   const setVoice = useCallback((voice: SpeechSynthesisVoice | null) => {
     setSelectedVoice(voice);

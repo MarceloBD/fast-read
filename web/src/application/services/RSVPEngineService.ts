@@ -51,6 +51,11 @@ export class RSVPEngineService {
     if (this.tokens.length === 0) return;
     if (this.isPlaying) return;
 
+    if (this.currentIndex >= this.tokens.length) {
+      this.currentIndex = 0;
+      this.callbacks?.onWordChange(0);
+    }
+
     this.isPlaying = true;
     this.scheduleNext();
   }

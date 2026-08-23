@@ -8,6 +8,15 @@
   flex-direction: column;
 }
 
+.landingShell {
+  width: 100vw;
+  min-height: 100dvh;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+}
+
 .readerLayout {
   display: flex;
   flex-direction: column;

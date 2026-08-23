@@ -15,19 +15,19 @@ export function findVoiceForLanguage(
   languageCode: string
 ): SpeechSynthesisVoice | null {
   const normalizedCode = languageCode.toLowerCase();
-
-  const exactMatch = voices.find(
-    (voice) => voice.lang.toLowerCase() === normalizedCode
-  );
-  if (exactMatch) return exactMatch;
-
   const prefix = normalizedCode.split("-")[0];
-  const prefixMatch = voices.find(
-    (voice) => voice.lang.toLowerCase().startsWith(prefix + "-") || voice.lang.toLowerCase() === prefix
-  );
-  if (prefixMatch) return prefixMatch;
 
-  return null;
+  const matchingVoices = voices.filter((voice) => {
+    const voiceLang = voice.lang.toLowerCase();
+    return voiceLang === normalizedCode || voiceLang.startsWith(prefix + "-") || voiceLang === prefix;
+  });
+
+  if (matchingVoices.length === 0) return null;
+
+  const localVoice = matchingVoices.find((voice) => voice.localService);
+  if (localVoice) return localVoice;
+
+  return matchingVoices[0];
 }
 
 export function detectTextLanguage(text: string): string | null {
