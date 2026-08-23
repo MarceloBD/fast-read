@@ -8,7 +8,7 @@ export interface TTSCallbacks {
 }
 
 const STARTUP_TIMEOUT_MS = 5_000;
-const MAX_CHUNK_WORDS = 50;
+const COMPLETION_THRESHOLD_WORDS = 5;
 const MAX_RATE = 2.0;
 const MIN_RATE = 0.5;
 
@@ -22,7 +22,6 @@ export class TextToSpeechService {
   private selectedVoice: SpeechSynthesisVoice | null = null;
   private words: string[] = [];
   private currentWordIndex = 0;
-  private startFromIndex = 0;
   private startupTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingStartFromIndex: number | null = null;
   private isWarmedUp = false;
@@ -51,11 +50,8 @@ export class TextToSpeechService {
 
   setRate(rate: number): void {
     this.rate = Math.max(MIN_RATE, Math.min(MAX_RATE, rate));
-
     if (this.isActive && !this.isPausedState) {
-      const resumeIndex = this.currentWordIndex;
-      this.cancelSpeech();
-      this.speakFromIndex(resumeIndex);
+      this.speakFromIndex(this.currentWordIndex);
     }
   }
 
@@ -85,14 +81,9 @@ export class TextToSpeechService {
     const generation = this.utteranceGeneration;
 
     this.cancelSpeech();
-
-    this.startFromIndex = fromIndex;
     this.currentWordIndex = fromIndex;
-    this.pendingStartFromIndex = fromIndex;
 
-    const chunkEnd = Math.min(fromIndex + MAX_CHUNK_WORDS, this.words.length);
-    const textToSpeak = this.words.slice(fromIndex, chunkEnd).join(" ");
-
+    const textToSpeak = this.words.slice(fromIndex).join(" ");
     if (!textToSpeak.trim()) {
       this.isActive = false;
       this.callbacks?.onComplete();
@@ -122,12 +113,14 @@ export class TextToSpeechService {
       if (generation !== this.utteranceGeneration) return;
       if (this.isPausedState) return;
 
-      if (chunkEnd < this.words.length) {
-        this.speakFromIndex(chunkEnd);
-      } else {
-        this.isActive = false;
-        this.callbacks?.onComplete();
+      const remainingWords = this.words.length - this.currentWordIndex - 1;
+      if (remainingWords > COMPLETION_THRESHOLD_WORDS) {
+        this.speakFromIndex(this.currentWordIndex);
+        return;
       }
+
+      this.isActive = false;
+      this.callbacks?.onComplete();
     };
 
     utterance.onboundary = (event) => {
@@ -135,7 +128,7 @@ export class TextToSpeechService {
       if (event.name === "word") {
         const spokenText = textToSpeak.slice(0, event.charIndex);
         const wordsBefore = spokenText.split(/\s+/).filter((word) => word.length > 0).length;
-        this.currentWordIndex = this.startFromIndex + wordsBefore;
+        this.currentWordIndex = fromIndex + wordsBefore;
         this.callbacks?.onWordSpoken(this.currentWordIndex);
       }
     };
@@ -151,6 +144,7 @@ export class TextToSpeechService {
     };
 
     this.synthesis.speak(utterance);
+    this.pendingStartFromIndex = fromIndex;
     this.scheduleStartupTimeout(fromIndex);
   }
 
@@ -163,7 +157,6 @@ export class TextToSpeechService {
     this.startupTimer = setTimeout(() => {
       if (this.pendingStartFromIndex !== fromIndex) return;
       if (!this.isActive && !this.isPausedState && this.utterance !== null) {
-        this.cancelSpeech();
         this.speakFromIndex(fromIndex);
       }
     }, STARTUP_TIMEOUT_MS);
@@ -192,6 +185,7 @@ export class TextToSpeechService {
   }
 
   stop(): void {
+    this.utteranceGeneration++;
     this.cancelSpeech();
     this.isActive = false;
     this.isPausedState = false;
@@ -199,6 +193,7 @@ export class TextToSpeechService {
   }
 
   forceReset(): void {
+    this.utteranceGeneration++;
     this.cancelSpeech();
     this.isActive = false;
     this.isPausedState = false;
@@ -233,11 +228,8 @@ export class TextToSpeechService {
 
   setVoice(voice: SpeechSynthesisVoice | null): void {
     this.selectedVoice = voice;
-
     if (this.isActive && !this.isPausedState) {
-      const resumeIndex = this.currentWordIndex;
-      this.cancelSpeech();
-      this.speakFromIndex(resumeIndex);
+      this.speakFromIndex(this.currentWordIndex);
     }
   }
 
