@@ -4,12 +4,12 @@
 
 ## Features
 
-- [Speed Reading with RSVP](https://fast-read.vercel.app/): Read documents at 300-1500 words per minute
-- [Multiple Format Support](https://fast-read.vercel.app/): Supports PDF, EPUB, Markdown, HTML, and plain text files
-- [Study and Speed Modes](https://fast-read.vercel.app/): Study mode pauses on code/images, Speed mode skips them
-- [Customizable Themes](https://fast-read.vercel.app/): Dark, Light, Sepia, and High Contrast themes
-- [Text-to-Speech](https://fast-read.vercel.app/): Native browser TTS with adjustable speed
-- [Keyboard Controls](https://fast-read.vercel.app/): Full keyboard navigation for hands-free reading
+- [Speed Reading with RSVP](https://fastread.marcelodiani.online/): Read documents at 300-1500 words per minute
+- [Multiple Format Support](https://fastread.marcelodiani.online/): Supports PDF, EPUB, Markdown, HTML, and plain text files
+- [Study and Speed Modes](https://fastread.marcelodiani.online/): Study mode pauses on code/images, Speed mode skips them
+- [Customizable Themes](https://fastread.marcelodiani.online/): Dark, Light, Sepia, and High Contrast themes
+- [Text-to-Speech](https://fastread.marcelodiani.online/): Native browser TTS with adjustable speed
+- [Keyboard Controls](https://fastread.marcelodiani.online/): Full keyboard navigation for hands-free reading
 
 ## How It Works
 

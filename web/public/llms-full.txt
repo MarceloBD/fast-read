@@ -71,7 +71,7 @@ The Optimal Recognition Point is the character position in a word where your eye
 ## Getting Started
 
 ### Web Version
-1. Visit https://fast-read.vercel.app
+1. Visit https://fastread.marcelodiani.online
 2. Paste text or drag and drop a file
 3. Click Play to start speed reading
 4. Adjust speed with Up/Down arrows or slider
